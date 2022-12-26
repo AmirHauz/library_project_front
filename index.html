@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="../static/favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../static/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../static/favicon/favicon-16x16.png">
+    <link rel="manifest" href="../static/favicon/site.webmanifest">
+     <!-- CSS only -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
+<style>
+  .center {
+      text-align: center;
+  }
+  .left {
+      text-align: left;
+      margin-left: 1in;
+  }
+  .h1 { 
+    margin-bottom: 0.4in;
+    color: blue;
+    font-weight: bold;
+  }
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    margin-left: 0.2in;
+    margin-right: 0.2in;
+  }
+  hr {
+    color:rgb(63, 108, 93);
+  }
+  .heavy-line {
+    border-top: 3px double #332a74;
+  }
+
+/* The Modal (background) */
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  padding-top: 100px; /* Location of the box */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content */
+.modal-content {
+  background-color: #fefefe;
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+}
+
+</style>
+<script src="https://unpkg.com/axios@1.1.2/dist/axios.min.js"></script>
+</head>
+<body>
+    <nav class="navbar" style="background-color: #d9d9dc;">
+        <ul class="nav nav-tabs">
+            <li class="nav-item">
+                <a class="navbar-brand" href="../index.html">
+                    <img src="../static/main_picture.jpg" alt="Bootstrap" width="40" height="40">
+                  </a>
+              </li>
+            <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="../index.html">Home</a>
+            </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">Loans</a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="../index.html">Loan</a></li>
+                <li><a class="dropdown-item" href="../loan_extend.html">Extend</a></li>
+                <li><a class="dropdown-item" href="../index.html">Return</a></li>
+              </ul>
+            </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">Customers</a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="../customers_new.html">New</a></li>
+                <li><a class="dropdown-item" href="../customer_exist.html">Existing</a></li>
+              </ul>
+            </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">Books</a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="../books_new.html">New</a></li>
+                <li><a class="dropdown-item" href="../books_update.html">Update</a></li>
+                <li><a class="dropdown-item" href="../index.html">Delete</a></li>
+              </ul>
+            </li>
+          </ul>      
+        </nav>
+        <br>
+  <!-- header for page i am in:-->
+  <h1 class="h1">The Hauz Library Books</h1>
+  <!-- search:-->
+  <div class="left">
+      <h2>Search the Library </h2>
+      By book name: <input id="search_book_name" onkeyup="buildDisplay()"><br><br>
+      By author: <input id="search_author" onkeyup="buildDisplay()">
+      <br>
+      <hr class="heavy-line">
+      <div id="display"></div>
+
+<!-- The Modal -->
+<div id="myModal" class="modal">
+
+  <!-- Modal content -->
+  <div class="modal-content">
+    <p>Loan the book: </p>
+    <div id="bookDetailsInModal"></div>
+    Customer: <input id="search_customer_name" onkeyup="buildCustomerDisplay()"><br>
+     <div id="selectCustomer">
+      
+    </div>
+  </div>
+
+</div>
+
+  <script>
+    const MY_SERVER_BOOKS = "https://library-progect.onrender.com/books"
+    const MY_SERVER_LOANS = "https://library-progect.onrender.com/loans"
+    const MY_SERVER_CUSTOMERS = "https://library-progect.onrender.com/customers"
+    let books = []
+    let customers = []
+    selectedBookId = null
+
+    const buildDisplay = () => {
+       const now = new Date().toJSON().slice(0, 10)
+       console.log(now)
+        display.innerHTML = books.data.sort((a, b) => {return a.return_date > b.return_date ? 1 : -1}
+        ).filter(act => act.is_active == true).filter(
+            search => search.book_name.toLowerCase().includes(search_book_name.value.toLowerCase()) 
+        ).filter(
+            search => search.author.toLowerCase().includes(search_author.value.toLowerCase()) 
+        ).map(book => `
+        Book name: ${book.book_name}, Author: ${book.author},
+        <button onclick='delLoan(${book.loan_id})' ${!book.is_loaned ? 'disabled': ''}>Return</button> 
+        <button onclick='loanBook(${JSON.stringify(book)})' ${book.is_loaned ? 'disabled': ''}>Loan</button> 
+        <button onclick='delBook(${book.id})' ${book.is_loaned ? 'disabled': ''}>Delete</button> 
+        <div style="color: ${book.return_date < now ? 'red': 'olive'}">${book.is_loaned ? '(Return on: ' + book.return_date + ')' : ""}</div>
+        <hr>`
+        ).join("") //build display
+    }
+    const loadData = async () => {
+      books = await axios.get(MY_SERVER_BOOKS) //get data from server
+      console.log(books.data)
+      buildDisplay()
+    }
+    loadData()
+
+    const loadCustomer = async () => {
+      customers = await axios.get(MY_SERVER_CUSTOMERS)
+      console.log(customers.data)
+      buildCustomerDisplay()
+    }
+    loadCustomer()
+    
+    const delLoan = async (id) => {
+      console.log(id)
+      await axios.delete(MY_SERVER_LOANS + "/" + id).then((res) => console.log(res.data))
+      loadData()
+    }
+
+    const delBook = async (id) => {
+      console.log(id)
+      await axios.delete(MY_SERVER_BOOKS + "/" + id).then((res) => console.log(res.data))
+      loadData()
+    }
+
+    var modal = document.getElementById("myModal");
+    var book_details_in_modal = document.getElementById("bookDetailsInModal")
+    var select_customer = document.getElementById("selectCustomer")
+    const loanBook = function (book) {
+      selectedBookId = book.id
+      modal.style.display = "block";
+      book_details_in_modal.innerHTML = `${book.author}: ${book.book_name}`
+
+    }
+
+    const buildCustomerDisplay = () => {
+        select_customer.innerHTML = customers.data.filter(cust => cust.amount_to_loan > 0)
+        .filter(act => act.is_active == true)
+        .filter(
+          search => search.customer_name.toLowerCase().includes(search_customer_name.value.toLowerCase()) 
+        ).map(customer => `
+        Customer: ${customer.customer_name}, Phone: ${customer.phone_number},Amount of books left to  loan: ${customer.amount_to_loan}
+        <button onclick='createLoan(${customer.id})'>Create Loan</button> 
+        <br>
+        `
+        ).join("")
+    }
+
+    const setBook = function(id) {
+      selectedBookId = id
+    }
+
+    const createLoan = async (customer_id) => {
+      console.log(selectedBookId)
+      console.log(customer_id)
+      await axios.post(
+        MY_SERVER_LOANS, 
+        {customer_id: customer_id, book_id: selectedBookId}
+      ).then((res) => console.log(res.data))
+      loadData()
+    }
+
+  window.onclick = function(event) {
+    if (event.target == modal) {
+      modal.style.display = "none";
+    }
+  }
+  </script>
+</body>
+</html>

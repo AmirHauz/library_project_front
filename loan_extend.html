@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="../static/favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../static/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../static/favicon/favicon-16x16.png">
+     <!-- CSS only -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
+<style>
+  .center {
+      text-align: center;
+  }
+  .left {
+      text-align: left;
+      margin-left: 1in;
+  }
+  .h1 { 
+    margin-bottom: 0.4in;
+    color: blue;
+    font-weight: bold;
+  }
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    margin-left: 0.2in;
+    margin-right: 0.2in;
+  }
+  hr {
+    color:rgb(63, 108, 93);
+  }
+  .heavy-line {
+    border-top: 3px double #332a74;
+  }
+
+/* The Modal (background) */
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  padding-top: 100px; /* Location of the box */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content */
+.modal-content {
+  background-color: #fefefe;
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+}
+
+</style>
+<script src="https://unpkg.com/axios@1.1.2/dist/axios.min.js"></script>
+</head>
+<body>
+  <nav class="navbar" style="background-color: #d9d9dc;">
+    <ul class="nav nav-tabs">
+        <li class="nav-item">
+            <a class="navbar-brand" href="../index.html">
+                <img src="../static/main_picture.jpg" alt="Bootstrap" width="40" height="40">
+              </a>
+          </li>
+        <li class="nav-item">
+          <a class="nav-link active" aria-current="page" href="../index.html">Home</a>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">Loans</a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="../index.html">Loan</a></li>
+            <li><a class="dropdown-item" href="../loan_extend.html">Extend</a></li>
+            <li><a class="dropdown-item" href="../index.html">Return</a></li>
+          </ul>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">Customers</a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="../customers_new.html">New</a></li>
+            <li><a class="dropdown-item" href="../customer_exist.html">Existing</a></li>
+          </ul>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">Books</a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="../books_new.html">New</a></li>
+            <li><a class="dropdown-item" href="../books_update.html">Update</a></li>
+            <li><a class="dropdown-item" href="../index.html">Delete</a></li>
+          </ul>
+        </li>
+      </ul>      
+    </nav>
+        <br>
+  <!-- header for page i am in:-->
+  <h1 class="h1">Extend Loan</h1>
+  <!-- search:-->
+  <div class="left">
+      <h2>Search the Library </h2>
+      By book name: <input id="search_book_name" onkeyup="buildDisplay()"><br><br>
+      By customer name: <input id="search_customer_name" onkeyup="buildDisplay()">
+      By customer phone number: <input id="search_phone" onkeyup="buildDisplay()">
+      <br>
+      <hr class="heavy-line">
+      <div id="display"></div>
+
+<!-- The Modal -->
+<div id="myModal" class="modal">
+
+  <!-- Modal content -->
+  <div class="modal-content">
+    <p>extend loan: </p>
+    <div id="loandata"></div>
+   
+     <div id="selectCustomer">
+      
+    </div>
+  </div>
+
+</div>
+
+  <script>
+    const MY_SERVER_LOANS = "https://library-progect.onrender.com/loans"
+    let loans = []
+
+    const buildDisplay = () => {
+        display.innerHTML = loans.data.sort((a, b) => {return a.return_date > b.return_date ? -1 : 1}
+        )
+        .filter(act => act.is_active == true)
+        .filter(
+            search => search.book_name.toLowerCase().includes(search_book_name.value.toLowerCase()) 
+        )
+        .filter(
+            search => search.customer_name.toLowerCase().includes(search_customer_name.value.toLowerCase()) 
+        )
+        .filter(
+            search => search.phone_number.includes(search_phone.value)
+        )
+        .map(loan => `
+            Custome name: ${loan.customer_name}, Phone:${loan.phone_number}, Book name: ${loan.book_name}, Return date: ${loan.return_date}
+            <button onclick='modalOpen(${JSON.stringify(loan)})'>Extend</button> 
+            
+        <hr>`
+        ).join("") //build display
+    }
+    const loadData = async () => {
+      loans = await axios.get(MY_SERVER_LOANS) //get data from server
+      console.log(loans.data)
+      buildDisplay()
+    }
+    loadData()
+
+    var modal = document.getElementById("myModal");
+    var loan_data = document.getElementById("loandata")
+    const modalOpen = (loan) => {
+      modal.style.display = "block";
+      loan_data.innerHTML = `${loan.customer_name} want to extend: ${loan.book_name}<br>
+      <label for="start">New return date:</label>
+
+        <input type="date" id="returnDate" name="trip-start"
+       value="${loan.return_date}"
+       min="${loan.return_date}" max="2023-12-31"><br>
+       <button onclick='extendLoan(${loan.id})'>Submit</button> 
+      `
+      
+    }
+    
+    const extendLoan = async(id) => {
+      newReturnDate = {return_date: returnDate.value}
+      
+      const res = await axios.put(MY_SERVER_LOANS + "/" + id, newReturnDate)
+        console.log(res)
+        loadData()
+    }
+
+    
+
+  window.onclick = function(event) {
+    if (event.target == modal) {
+      modal.style.display = "none";
+    }
+  }
+  </script>
+</body>
+</html>
